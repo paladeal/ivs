@@ -1,7 +1,9 @@
+import { LoginButton } from "./_components/LoginButton";
 export default function Home() {
   return (
     <div className="">
-      ivsのプロジェクトです
+      <p>ivsのプロジェクトです</p>
+      <LoginButton />
     </div>
   );
 }
