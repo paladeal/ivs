@@ -9,10 +9,47 @@ datasource db {
 }
 
 model User {
-  id                                String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  supabaseUserId                    String              @unique @map("supabase_user_id")
-  email                             String
-  name                              String
+  id                      String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  supabaseUserId          String              @unique @map("supabase_user_id")
+  email                   String
+  name                    String
+
+  chatRooms               ChatRoom[]
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   @@map("users")
+}
+
+model ChatRoom {
+  id          String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  title       String?     
+  userId      String      @map("user_id") @db.Uuid
+  user        User        @relation(fields: [userId], references: [id])
+  messages    ChatMessage[]
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("chatRooms")
+}
+
+model ChatMessage {
+  id              String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  chatRoomId      String       @map("chat_room_id") @db.Uuid
+  role            Sender
+  content         String
+
+  chatRoom        ChatRoom    @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("chatMessages")
+}
+
+enum Sender {
+  USER
+  SYSTEM
 }
