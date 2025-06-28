@@ -1,9 +1,10 @@
-import { LoginButton } from "./_components/LoginButton";
+import {GuestLoginButton} from "./_components/GuestLoginButton";
 export default function Home() {
   return (
     <div className="">
       <p>ivsのプロジェクトです</p>
-      <LoginButton />
+      {/* <AnonymousAuthButton /> */}
+      <GuestLoginButton/>
     </div>
   );
 }
