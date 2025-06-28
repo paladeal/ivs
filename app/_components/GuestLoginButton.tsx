@@ -16,9 +16,10 @@ export const GuestLoginButton: React.FC = () => {
         if (error) {
             console.error("ログイン失敗しました", error)
             toast.error("ログインに失敗しました");
+            return;
         }
         toast.success("ゲストログインしました");
-        push("/dashboard");
+        push("/chat_rooms");
     }
     return (
         <Button variant="rose-gray" onClick={handleLogin}>ゲストログイン</Button>

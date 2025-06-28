@@ -21,7 +21,7 @@ export class OpenAIService {
     messages: ChatCompletionMessageParam[],
   ): Promise<string> {
     const response = await this.openai.chat.completions.parse({
-      model: "gpt-4o-mini",
+      model: "gpt-4.1-nano",
       messages: messages,
       temperature: 1,
       max_tokens: 16384,
