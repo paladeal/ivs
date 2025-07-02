@@ -8,6 +8,32 @@ export default function VideoProcessingPage() {
   const [isDetecting, setIsDetecting] = useState(false);
   const [detectionStatus, setDetectionStatus] = useState('カメラを起動中...');
   const animationIdRef = useRef<number>(0);
+  const [lastDetectionTime, setLastDetectionTime] = useState(0);
+
+  const playDetectionSound = () => {
+    try {
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance('こんにちは！！');
+        utterance.lang = 'ja-JP';
+        utterance.rate = 1.0;
+        utterance.pitch = 1.2;
+        utterance.volume = 0.8;
+        
+        // 日本語の音声を優先的に選択
+        const voices = speechSynthesis.getVoices();
+        const japaneseVoice = voices.find(voice => voice.lang.includes('ja'));
+        if (japaneseVoice) {
+          utterance.voice = japaneseVoice;
+        }
+        
+        speechSynthesis.speak(utterance);
+      } else {
+        console.warn('音声合成がサポートされていません');
+      }
+    } catch (error) {
+      console.error('音声再生エラー:', error);
+    }
+  };
 
   useEffect(() => {
     let stream: MediaStream | null = null;
@@ -84,6 +110,13 @@ export default function VideoProcessingPage() {
             // 検出状態を更新
             if (humans.length > 0) {
               setDetectionStatus(`${humans.length}人の人物を検出中`);
+              
+              // 人物検出時の音声通知（3秒間隔で制限）
+              const currentTime = Date.now();
+              if (currentTime - lastDetectionTime > 3000) {
+                playDetectionSound();
+                setLastDetectionTime(currentTime);
+              }
               
               // 検出結果を描画
               humans.forEach((prediction: any) => {
