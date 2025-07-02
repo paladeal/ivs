@@ -46,9 +46,7 @@ export default function Products() {
           onClose={handleCloseProductDetail}
         />
       )}
-      <div className="h-[400px] z-50 fixed bottom-0 ">
-        <AvatarAI />
-      </div>
+      <AvatarAI />
       <AIChatButton onChatOpen={handleChatOpen} />
       {isChatOpen && <AIChatMock setIsChatOpen={setIsChatOpen} />}
     </div>
