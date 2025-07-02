@@ -3,15 +3,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
   --color-gray-lightest: #efefef;
-  -color-rose-gray: #a49696;
+  --color-rose-gray: #a49696;
+  --font-geist-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-geist-mono: ui-monospace, SFMono-Regular, "SF Mono", monospace;
 }
 
 @media (prefers-color-scheme: dark) {
