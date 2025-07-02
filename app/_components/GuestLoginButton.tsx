@@ -1,5 +1,4 @@
-"use client"
-import { Button } from "./Button"
+"use client";
 import { supabase } from "../_lib/supabase";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
