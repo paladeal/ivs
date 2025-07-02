@@ -16,7 +16,7 @@ export const GuestLoginButton: React.FC = () => {
       return;
     }
     toast.success("ゲストログインしました");
-    push("/chat_rooms");
+    push("/products");
   };
   return (
     <button
