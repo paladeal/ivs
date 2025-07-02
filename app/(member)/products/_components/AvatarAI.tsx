@@ -39,12 +39,17 @@
 // };
 
 "use client";
-import React, { Suspense, useEffect, useRef } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useFBX, useAnimations } from '@react-three/drei';
 import * as THREE from 'three';
+import { useVoiceRecognition } from '@/app/_hooks/useVoiceRecognition';
 
-const AnimatedAvatarModel = () => {
+interface AnimatedAvatarModelProps {
+  isListening?: boolean;
+}
+
+const AnimatedAvatarModel: React.FC<AnimatedAvatarModelProps> = ({ isListening = false }) => {
   const modelSrc = "/dummy.fbx"; 
   const group = useRef<THREE.Group>(null);
 
@@ -68,7 +73,14 @@ const AnimatedAvatarModel = () => {
   // アニメーションの更新を確実にする
   useFrame(() => {
     if (group.current) {
-      group.current.rotation.y += 0.01; // テスト用の回転
+      // 音声認識中は少し速く回転
+      const rotationSpeed = isListening ? 0.02 : 0.01;
+      group.current.rotation.y += rotationSpeed;
+      
+      // 音声認識中は軽く上下に動かす
+      if (isListening) {
+        group.current.position.y = -1 + Math.sin(Date.now() * 0.002) * 0.05;
+      }
     }
   });
   
@@ -80,6 +92,31 @@ const AnimatedAvatarModel = () => {
 };
 
 export const AvatarAI: React.FC = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const {
+    isListening,
+    transcript,
+    interimTranscript,
+    startListening,
+    stopListening,
+    resetTranscript,
+    isSupported
+  } = useVoiceRecognition({
+    onResult: (text) => {
+      console.log('音声認識結果:', text);
+    },
+    onError: (error) => {
+      console.error('音声認識エラー:', error);
+    }
+  });
+
+  const handleMicClick = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
 
   return (
     <div 
@@ -87,25 +124,171 @@ export const AvatarAI: React.FC = () => {
         position: 'fixed',
         bottom: '24px',
         left: '24px',
-        width: '160px',
-        height: '160px',
+        width: isExpanded ? '320px' : '160px',
+        height: isExpanded ? '400px' : '160px',
         zIndex: 9999,
-        pointerEvents: 'auto'
+        pointerEvents: 'auto',
+        transition: 'all 0.3s ease-in-out',
+        background: isExpanded ? 'rgba(255, 255, 255, 0.95)' : 'transparent',
+        borderRadius: '12px',
+        boxShadow: isExpanded ? '0 4px 20px rgba(0, 0, 0, 0.15)' : 'none'
       }}
     >
-      <Canvas 
-        camera={{ position: [0, 1.5, 3], fov: 40 }}
-        style={{ width: '100%', height: '100%' }}
-        gl={{ preserveDrawingBuffer: true, antialias: true }}
-      >
-        <ambientLight intensity={0.8} />
-        <directionalLight position={[0, 3, 2]} intensity={0.5} />
-        <Suspense fallback={null}>
-          {/* AnimatedAvatarModelコンポーネントを呼び出し、FBXファイルのパスを渡します。 */}
-          <AnimatedAvatarModel />
-        </Suspense>
-        {/* <OrbitControls /> */}
-      </Canvas>
+      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+        <Canvas 
+          camera={{ position: [0, 1.5, 3], fov: 40 }}
+          style={{ 
+            width: isExpanded ? '160px' : '100%', 
+            height: '160px',
+            position: 'absolute',
+            top: 0,
+            left: 0
+          }}
+          gl={{ preserveDrawingBuffer: true, antialias: true }}
+        >
+          <ambientLight intensity={0.8} />
+          <directionalLight position={[0, 3, 2]} intensity={0.5} />
+          <Suspense fallback={null}>
+            <AnimatedAvatarModel isListening={isListening} />
+          </Suspense>
+        </Canvas>
+
+        {/* 音声認識コントロール */}
+        <div style={{
+          position: 'absolute',
+          bottom: '8px',
+          right: '8px',
+          display: 'flex',
+          gap: '8px'
+        }}>
+          {isSupported && (
+            <button
+              onClick={handleMicClick}
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                border: 'none',
+                background: isListening ? '#ef4444' : '#3b82f6',
+                color: 'white',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '20px',
+                transition: 'background 0.3s',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+              }}
+              title={isListening ? '音声認識を停止' : '音声認識を開始'}
+            >
+              {isListening ? '🔴' : '🎤'}
+            </button>
+          )}
+          
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              border: 'none',
+              background: '#6b7280',
+              color: 'white',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '16px',
+              transition: 'transform 0.3s',
+              transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+            }}
+          >
+            ↗️
+          </button>
+        </div>
+
+        {/* 音声認識結果表示 */}
+        {isExpanded && (
+          <div style={{
+            position: 'absolute',
+            top: '170px',
+            left: '10px',
+            right: '10px',
+            bottom: '60px',
+            padding: '12px',
+            overflowY: 'auto',
+            borderTop: '1px solid #e5e7eb'
+          }}>
+            <h3 style={{ 
+              fontSize: '14px', 
+              fontWeight: 'bold', 
+              marginBottom: '8px',
+              color: '#374151'
+            }}>
+              音声認識結果
+            </h3>
+            
+            {isListening && (
+              <div style={{
+                padding: '8px',
+                background: '#fef3c7',
+                borderRadius: '6px',
+                marginBottom: '8px',
+                fontSize: '12px',
+                color: '#92400e'
+              }}>
+                🎤 聞き取り中...
+              </div>
+            )}
+
+            {interimTranscript && (
+              <div style={{
+                padding: '8px',
+                background: '#f3f4f6',
+                borderRadius: '6px',
+                marginBottom: '8px',
+                fontSize: '13px',
+                color: '#6b7280',
+                fontStyle: 'italic'
+              }}>
+                {interimTranscript}
+              </div>
+            )}
+
+            {transcript && (
+              <div style={{
+                padding: '8px',
+                background: '#f9fafb',
+                borderRadius: '6px',
+                fontSize: '13px',
+                color: '#111827',
+                whiteSpace: 'pre-wrap'
+              }}>
+                {transcript}
+              </div>
+            )}
+
+            {transcript && (
+              <button
+                onClick={resetTranscript}
+                style={{
+                  marginTop: '8px',
+                  padding: '6px 12px',
+                  fontSize: '12px',
+                  background: '#f3f4f6',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  color: '#6b7280'
+                }}
+              >
+                クリア
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
