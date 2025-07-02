@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { OpenAIService } from '../_services/OpenAIService';
 import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
+import productsData from '../_data/products.json';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,10 +14,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 商品情報を含むシステムプロンプトを作成
+    const productCatalog = productsData.slice(0, 10).map(product => 
+      `- ${product.name}: ${product.price} - ${product.description}`
+    ).join('\n');
+
+    const systemPrompt = `あなたは親切で知識豊富なECサイトのアシスタントです。商品に関する質問に答えたり、購入のサポートをしたりします。日本語で応答してください。
+
+現在取り扱っている商品の一部をご紹介します：
+${productCatalog}
+
+他にも${productsData.length}種類以上の商品を取り扱っています。すべて手作りでサステナブルな素材を使用した商品です。カテゴリは雑貨、衣類、インテリアなどがあります。
+
+お客様のニーズに合わせて、適切な商品をご提案したり、詳細な情報をお伝えしたりします。`;
+
     const messages: ChatCompletionMessageParam[] = [
       {
         role: 'system',
-        content: 'あなたは親切で知識豊富なECサイトのアシスタントです。商品に関する質問に答えたり、購入のサポートをしたりします。日本語で応答してください。'
+        content: systemPrompt
       },
       {
         role: 'user',
