@@ -13,7 +13,7 @@ export default function VideoProcessingPage() {
   const playDetectionSound = () => {
     try {
       if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance('こんにちは！！');
+        const utterance = new SpeechSynthesisUtterance('へい!!らっしゃい！！！');
         utterance.lang = 'ja-JP';
         utterance.rate = 1.0;
         utterance.pitch = 1.2;
@@ -141,6 +141,10 @@ export default function VideoProcessingPage() {
               });
             } else {
               setDetectionStatus('人物を検出していません');
+              // 人物が検出されなくなったら音声合成を停止
+              if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+              }
             }
           } catch (error) {
             console.error('検出エラー:', error);
