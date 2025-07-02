@@ -26,7 +26,7 @@ export const SocialLoginButton: React.FC<Props> = ({ provider, icon: Icon, bgCol
             return;
         }
         toast.success("ゲストログインしました");
-        push("/chat_rooms");
+        push("/products");
     }
 
   return (
