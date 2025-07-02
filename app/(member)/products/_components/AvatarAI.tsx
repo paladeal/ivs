@@ -93,6 +93,64 @@ const AnimatedAvatarModel: React.FC<AnimatedAvatarModelProps> = ({ isListening =
 
 export const AvatarAI: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [chatHistory, setChatHistory] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const lastProcessedMessageRef = useRef<string>('');
+  
+  // Auto-scroll to bottom when new messages are added
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatHistory]);
+  
+  const sendToGPT = async (message: string) => {
+    // 同じメッセージの重複送信を防ぐ
+    if (lastProcessedMessageRef.current === message || isLoading) {
+      console.log('Duplicate message or already loading, skipping...');
+      return;
+    }
+    
+    lastProcessedMessageRef.current = message;
+    setIsLoading(true);
+    setChatHistory(prev => [...prev, { role: 'user', content: message }]);
+    
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        if (response.status === 429) {
+          setChatHistory(prev => [...prev, { 
+            role: 'assistant', 
+            content: data.error || 'API利用制限に達しました。しばらくしてから再度お試しください。' 
+          }]);
+        } else {
+          throw new Error(data.error || 'Failed to get response');
+        }
+        return;
+      }
+
+      setChatHistory(prev => [...prev, { role: 'assistant', content: data.response }]);
+    } catch (error) {
+      console.error('Error calling GPT API:', error);
+      setChatHistory(prev => [...prev, { 
+        role: 'assistant', 
+        content: '申し訳ございません。エラーが発生しました。もう一度お試しください。' 
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const {
     isListening,
     transcript,
@@ -102,8 +160,9 @@ export const AvatarAI: React.FC = () => {
     resetTranscript,
     isSupported
   } = useVoiceRecognition({
-    onResult: (text) => {
+    onResult: async (text) => {
       console.log('音声認識結果:', text);
+      await sendToGPT(text);
     },
     onError: (error) => {
       console.error('音声認識エラー:', error);
@@ -208,9 +267,11 @@ export const AvatarAI: React.FC = () => {
           </button>
         </div>
 
-        {/* 音声認識結果表示 */}
+        {/* チャット表示 */}
         {isExpanded && (
-          <div style={{
+          <div 
+            ref={chatContainerRef}
+            style={{
             position: 'absolute',
             top: '170px',
             left: '10px',
@@ -218,7 +279,10 @@ export const AvatarAI: React.FC = () => {
             bottom: '60px',
             padding: '12px',
             overflowY: 'auto',
-            borderTop: '1px solid #e5e7eb'
+            borderTop: '1px solid #e5e7eb',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
           }}>
             <h3 style={{ 
               fontSize: '14px', 
@@ -226,52 +290,68 @@ export const AvatarAI: React.FC = () => {
               marginBottom: '8px',
               color: '#374151'
             }}>
-              音声認識結果
+              AIアシスタント
             </h3>
             
+            {/* チャット履歴 */}
+            {chatHistory.map((message, index) => (
+              <div
+                key={index}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  maxWidth: '85%',
+                  alignSelf: message.role === 'user' ? 'flex-end' : 'flex-start',
+                  background: message.role === 'user' ? '#3b82f6' : '#f3f4f6',
+                  color: message.role === 'user' ? 'white' : '#374151',
+                  wordBreak: 'break-word'
+                }}
+              >
+                {message.content}
+              </div>
+            ))}
+
+            {/* 音声認識中の表示 */}
             {isListening && (
               <div style={{
                 padding: '8px',
                 background: '#fef3c7',
                 borderRadius: '6px',
-                marginBottom: '8px',
                 fontSize: '12px',
-                color: '#92400e'
+                color: '#92400e',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
               }}>
                 🎤 聞き取り中...
+                {interimTranscript && (
+                  <span style={{ fontStyle: 'italic' }}>{interimTranscript}</span>
+                )}
               </div>
             )}
 
-            {interimTranscript && (
+            {/* ローディング表示 */}
+            {isLoading && (
               <div style={{
                 padding: '8px',
-                background: '#f3f4f6',
+                background: '#e0e7ff',
                 borderRadius: '6px',
-                marginBottom: '8px',
-                fontSize: '13px',
-                color: '#6b7280',
-                fontStyle: 'italic'
+                fontSize: '12px',
+                color: '#4338ca',
+                alignSelf: 'flex-start'
               }}>
-                {interimTranscript}
+                考え中...
               </div>
             )}
 
-            {transcript && (
-              <div style={{
-                padding: '8px',
-                background: '#f9fafb',
-                borderRadius: '6px',
-                fontSize: '13px',
-                color: '#111827',
-                whiteSpace: 'pre-wrap'
-              }}>
-                {transcript}
-              </div>
-            )}
-
-            {transcript && (
+            {/* チャット履歴クリアボタン */}
+            {chatHistory.length > 0 && (
               <button
-                onClick={resetTranscript}
+                onClick={() => {
+                  setChatHistory([]);
+                  resetTranscript();
+                }}
                 style={{
                   marginTop: '8px',
                   padding: '6px 12px',
@@ -280,10 +360,11 @@ export const AvatarAI: React.FC = () => {
                   border: 'none',
                   borderRadius: '4px',
                   cursor: 'pointer',
-                  color: '#6b7280'
+                  color: '#6b7280',
+                  alignSelf: 'center'
                 }}
               >
-                クリア
+                チャットをクリア
               </button>
             )}
           </div>
