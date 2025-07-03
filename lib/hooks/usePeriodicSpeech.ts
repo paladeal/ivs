@@ -3,6 +3,17 @@ import { useCallback, useRef, useEffect, useMemo } from 'react';
 export interface PeriodicSpeechConfig {
   calloutTexts: string[];
   welcomeTexts: string[];
+  farewellTexts: string[];//追加
+  lang: string;
+  rate: number;
+  pitch: number;
+  volume: number;
+  intervalMs: number;
+}
+
+export interface PeriodicSpeechConfig {
+  calloutTexts: string[];
+  welcomeTexts: string[];
   lang: string;
   rate: number;
   pitch: number;
@@ -48,7 +59,8 @@ const DEFAULT_CONFIG: PeriodicSpeechConfig = {
   rate: 1.0,
   pitch: 1.2,
   volume: 0.8,
-  intervalMs: 1000
+  intervalMs: 5000,
+  farewellTexts: ["行かないで！", "待って！！"],//追加
 };
 
 export const usePeriodicSpeech = (config: Partial<PeriodicSpeechConfig> = {}) => {
@@ -117,10 +129,16 @@ export const usePeriodicSpeech = (config: Partial<PeriodicSpeechConfig> = {}) =>
     stopPeriodicCallout();
   }, [speakText, finalConfig.welcomeTexts, stopPeriodicCallout]);
 
+  // const onPersonLost = useCallback(() => {
+  //   hasPersonRef.current = false;
+  //   startPeriodicCallout();
+  // }, [startPeriodicCallout]);
   const onPersonLost = useCallback(() => {
     hasPersonRef.current = false;
+    const randomIndex = Math.floor(Math.random() * finalConfig.farewellTexts.length);//追加
+    speakText(finalConfig.farewellTexts[randomIndex]);//追加
     startPeriodicCallout();
-  }, [startPeriodicCallout]);
+  }, [startPeriodicCallout, finalConfig.farewellTexts, speakText]);
 
   const cleanup = useCallback(() => {
     stopPeriodicCallout();
