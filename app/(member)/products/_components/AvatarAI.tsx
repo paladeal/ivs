@@ -1,43 +1,3 @@
-// "use client";
-// import React, { useEffect, useRef } from "react";
-// import { Canvas } from "@react-three/fiber";
-// import { OrbitControls, useGLTF, useAnimations  } from "@react-three/drei";
-// import { Suspense } from "react";
-// import * as THREE from 'three';
-
-// const Model = () => {
-//   // const modelSrc = "https://models.readyplayer.me/686537c60a9e32fd24d3801b.glb";
-//   // const modelSrc = "https://models.readyplayer.me/686537c60a9e32fd24d3801b.glb"
-//   const modelSrc = "/dummy.fbx"; 
-//   const group = useRef<THREE.Group | null>(null);
-//   const { scene, animations } = useGLTF(modelSrc);
-//   const { actions } = useAnimations(animations, group);
-
-//   useEffect(() => {
-//     if (actions && Object.keys(actions).length > 0) {
-//       const firstActionName = Object.keys(actions)[0];
-//       actions[firstActionName]?.reset().fadeIn(0.5).play();
-//       console.log(`Playing animation: ${firstActionName}`);
-//     } else {
-//       console.log("No animations found in GLTF.");
-//     }
-//   }, [actions]); 
-
-//   return <primitive object={scene} ref={group} scale={0.8} position={[0, -1, 0]} />;
-// };
-// export const AvatarAI: React.FC = () => {
-//   return (
-//     <Canvas>
-//       <ambientLight intensity={1} />
-//       <directionalLight position={[0, 2, 2]} intensity={1} />
-//       <Suspense fallback={null}>
-//         <Model />
-//       </Suspense>
-//       <OrbitControls />
-//     </Canvas>
-//   );
-// };
-
 "use client";
 import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
@@ -153,7 +113,6 @@ export const AvatarAI: React.FC = () => {
 
   const {
     isListening,
-    transcript,
     interimTranscript,
     startListening,
     stopListening,
