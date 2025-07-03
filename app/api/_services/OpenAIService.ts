@@ -3,6 +3,13 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import type { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { z } from "zod";
 
+export type TTSVoice = "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer";
+
+export interface TTSOptions {
+  voice?: TTSVoice;
+  speed?: number;
+}
+
 export class OpenAIService {
   private static openai = new OpenAI({
     apiKey: process.env.OPENAI_SECRET_KEY,
@@ -32,5 +39,27 @@ export class OpenAIService {
     });
 
     return response.choices[0].message.parsed?.message || "";
+  }
+
+  /**
+   * OpenAI の Text-to-Speech API を使用してテキストを音声に変換します。
+   * @param {string} text - 音声に変換するテキスト
+   * @param {TTSOptions} options - 音声合成のオプション
+   * @returns {Promise<ArrayBuffer>} 音声データのArrayBuffer
+   */
+  public static async textToSpeech(
+    text: string,
+    options: TTSOptions = {}
+  ): Promise<ArrayBuffer> {
+    const { voice = "alloy", speed = 1.0 } = options;
+
+    const response = await this.openai.audio.speech.create({
+      model: "tts-1",
+      voice: voice,
+      input: text,
+      speed: speed,
+    });
+
+    return response.arrayBuffer();
   }
 }

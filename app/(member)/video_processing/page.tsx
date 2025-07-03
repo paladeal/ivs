@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useCamera } from '@/lib/hooks/use-camera';
 import { useHumanDetection, type HumanDetectionResult } from '@/lib/hooks/use-human-detection';
-import { usePeriodicSpeech } from '@/lib/hooks/usePeriodicSpeech';
+import { useEnhancedPeriodicSpeech } from '@/lib/hooks/useEnhancedPeriodicSpeech';
 import { VideoDisplay } from './_components/video-display';
 import { DetectionCanvas } from './_components/detection-canvas';
 import { StatusDisplay } from './_components/status-display';
@@ -15,12 +15,18 @@ export default function VideoProcessingPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDetecting, setIsDetecting] = useState(false);
   const [detectionStatus, setDetectionStatus] = useState('カメラを起動中...');
+  const [speechStatus, setSpeechStatus] = useState('');
   const camera = useCamera();
   const humanDetection = useHumanDetection();
-const {onPersonDetected,
+  const {
+    onPersonDetected,
     onPersonLost,
     startPeriodicCallout,
-    cleanup} = usePeriodicSpeech();
+    cleanup,
+    isLoading,
+    isSpeaking,
+    currentProvider
+  } = useEnhancedPeriodicSpeech();
 
   const handleDetection = (result: HumanDetectionResult) => {
     if (result.count > 0) {
@@ -66,7 +72,13 @@ const {onPersonDetected,
   return (
     <div className="container mx-auto p-4">
       {/* <h1 className="text-2xl font-bold mb-4">ビデオ処理 - 人物検知</h1> */}
-      <StatusDisplay status={detectionStatus} />  
+      <StatusDisplay status={detectionStatus} />
+      {(isLoading || isSpeaking) && (
+        <div className="mb-2 text-sm text-gray-600">
+          {isLoading ? '音声を生成中...' : '話しています...'}
+          <span className="ml-2 text-xs">({currentProvider === 'voicevox' ? 'VoiceVox' : 'ブラウザ'})</span>
+        </div>
+      )}  
       <div className="relative inline-block">
         <AvatarAI />
         <VideoDisplay ref={videoRef} />
