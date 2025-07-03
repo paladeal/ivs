@@ -58,9 +58,9 @@ const DEFAULT_CONFIG: PeriodicSpeechConfig = {
   lang: 'ja-JP',
   rate: 1.0,
   pitch: 1.2,
-  volume: 0.8,
-  intervalMs: 5000,
-  farewellTexts: ["行かないで！", "待って！！"],//追加
+  volume: 1.0,
+  intervalMs: 4000,
+  farewellTexts: ["行かないで！", "待って！！"]
 };
 
 export const usePeriodicSpeech = (config: Partial<PeriodicSpeechConfig> = {}) => {
