@@ -17,10 +17,12 @@ export default function VideoProcessingPage() {
   const [detectionStatus, setDetectionStatus] = useState('カメラを起動中...');
   const camera = useCamera();
   const humanDetection = useHumanDetection();
-const {onPersonDetected,
+const {
+    onPersonDetected,
     onPersonLost,
     startPeriodicCallout,
-    cleanup} = usePeriodicSpeech();
+    cleanup
+  } = usePeriodicSpeech();
 
   const handleDetection = (result: HumanDetectionResult) => {
     if (result.count > 0) {
