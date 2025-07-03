@@ -13,6 +13,7 @@ export const getCurrentUser = async ({ request }: { request: NextRequest }) => {
     throw new Error("Unauthorized");
   }
   const prisma = await buildPrisma();
+
   const user = await prisma.user.findUnique({
     where: {
       supabaseUserId: data.user.id,
