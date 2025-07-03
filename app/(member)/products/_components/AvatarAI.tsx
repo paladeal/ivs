@@ -1,6 +1,6 @@
 "use client";
 import React, { Suspense, useEffect, useRef, useState } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { useFBX, useAnimations } from '@react-three/drei';
 import * as THREE from 'three';
 import { useVoiceRecognition } from '@/app/_hooks/useVoiceRecognition';
@@ -30,22 +30,8 @@ const AnimatedAvatarModel: React.FC<AnimatedAvatarModelProps> = ({ isListening =
     }
   }, [actions, names]);
 
-  // アニメーションの更新を確実にする
-  useFrame(() => {
-    if (group.current) {
-      // 音声認識中は少し速く回転
-      const rotationSpeed = isListening ? 0.02 : 0.01;
-      group.current.rotation.y += rotationSpeed;
-      
-      // 音声認識中は軽く上下に動かす
-      if (isListening) {
-        group.current.position.y = -1 + Math.sin(Date.now() * 0.002) * 0.05;
-      }
-    }
-  });
-  
   return (
-    <group ref={group} scale={0.01} position={[0, -1, 0]}>
+    <group ref={group} scale={0.02} position={[0, -2, 0]}>
       <primitive object={fbx} />
     </group>
   );
