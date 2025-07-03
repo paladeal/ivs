@@ -48,7 +48,7 @@ const DEFAULT_CONFIG: PeriodicSpeechConfig = {
   rate: 1.0,
   pitch: 1.2,
   volume: 0.8,
-  intervalMs: 40000
+  intervalMs: 1000
 };
 
 export const usePeriodicSpeech = (config: Partial<PeriodicSpeechConfig> = {}) => {
