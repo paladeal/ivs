@@ -12,8 +12,7 @@ export const VideoDisplay = forwardRef<HTMLVideoElement, VideoDisplayProps>(
         ref={ref}
         autoPlay
         playsInline
-        className={className || "border border-gray-300"}
-        style={style || { maxWidth: '100%' ,display: 'none'}}
+        style={style || { maxWidth: '100%' , display: 'none', position: 'absolute', bottom: '-10000px' }}
       />
     );
   }

@@ -8,7 +8,7 @@ import { VideoDisplay } from './_components/video-display';
 import { DetectionCanvas } from './_components/detection-canvas';
 import { StatusDisplay } from './_components/status-display';
 import { WarningMessage } from './_components/warning-message';
-import { AvatarAI } from './_components/AvatarAI';
+// import { AvatarAI } from './_components/AvatarAI';
 
 export default function VideoProcessingPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -64,11 +64,12 @@ const {onPersonDetected,
   }, []);
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="mx-auto">
       {/* <h1 className="text-2xl font-bold mb-4">ビデオ処理 - 人物検知</h1> */}
       <StatusDisplay status={detectionStatus} />  
       <div className="relative inline-block">
-        <AvatarAI />
+        {/* <AvatarAI /> */}
+        <video src='video.mp4' className={'z-[99999] bg-white w-screen'} autoPlay loop muted playsInline/>
         <VideoDisplay ref={videoRef} />
         <DetectionCanvas ref={canvasRef} />
       </div>
