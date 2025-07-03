@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from "react";
+import { api } from "../../../_lib/api";
 
 /**
  * Props
@@ -35,19 +36,13 @@ export const AIChatMock: React.FC<Props> = ({ setIsChatOpen }) => {
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/chat_rooms/dummy-id/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ content: input }),
+      const result = await api.post<Record<string, any>, { reply: string; }>("/api/chat_rooms/e56902f0-d8c1-4a84-9d76-ee28a1a7e1c7/messages", {
+        content: JSON.stringify(userMessage),
       });
-
-      const data = await res.json();
 
       const assistantMessage: Message = {
         role: "assistant",
-        content: data.reply,
+        content: result.reply,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
