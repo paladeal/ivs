@@ -1,6 +1,6 @@
 "use client";
 import React, { Suspense, useEffect, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { useFBX, useAnimations } from '@react-three/drei';
 import * as THREE from 'three';
 
@@ -22,13 +22,6 @@ const AnimatedAvatarModel = () => {
     }
   }, [actions, names]);
 
-  // アニメーションの更新を確実にする
-  useFrame(() => {
-    if (group.current) {
-      group.current.rotation.y += 0.01; // テスト用の回転
-    }
-  });
-
   return (
     <group ref={group} scale={0.01} position={[0, -1, 0]}>
       <primitive object={fbx} />
@@ -42,9 +35,9 @@ export const AvatarAI: React.FC = () => {
       style={{ 
         position: 'fixed',
         bottom: '24px',
-        right: '24px',
-        width: '80%',
-        height: '80%',
+        right: '10px',
+        width: '90%',
+        height: '90%',
         zIndex: 9999,
         pointerEvents: 'auto'
       }}

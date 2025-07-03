@@ -65,14 +65,15 @@ const {onPersonDetected,
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">ビデオ処理 - 人物検知</h1>
+      {/* <h1 className="text-2xl font-bold mb-4">ビデオ処理 - 人物検知</h1> */}
       <StatusDisplay status={detectionStatus} />  
       <div className="relative inline-block">
+        <AvatarAI />
         <VideoDisplay ref={videoRef} />
         <DetectionCanvas ref={canvasRef} />
       </div>
       <WarningMessage show={!isDetecting} />
-      <AvatarAI />
+      
       <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest" defer></script>
       <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@latest" defer></script>
     </div>
