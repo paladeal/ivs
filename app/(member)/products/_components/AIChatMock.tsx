@@ -36,7 +36,7 @@ export const AIChatMock: React.FC<Props> = ({ setIsChatOpen }) => {
     setIsLoading(true);
 
     try {
-      const result = await api.post<Record<string, any>, { reply: string; }>("/api/chat_rooms/e56902f0-d8c1-4a84-9d76-ee28a1a7e1c7/messages", {
+      const result = await api.post<{content:string}, { reply: string; }>("/api/chat_rooms/e56902f0-d8c1-4a84-9d76-ee28a1a7e1c7/messages", {
         content: JSON.stringify(userMessage),
       });
 

@@ -23,7 +23,7 @@ const AnimatedAvatarModel = () => {
   }, [actions, names]);
 
   return (
-    <group ref={group} scale={0.01} position={[0, -1, 0]}>
+    <group ref={group} scale={0.02} position={[0, -2, 0]}>
       <primitive object={fbx} />
     </group>
   );
@@ -34,8 +34,6 @@ export const AvatarAI: React.FC = () => {
     <div 
       style={{ 
         position: 'fixed',
-        bottom: '24px',
-        right: '10px',
         width: '90%',
         height: '90%',
         zIndex: 9999,
