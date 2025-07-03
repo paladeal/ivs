@@ -5,6 +5,7 @@ import { buildError } from "../../../_lib/buildError";
 import { MessagesResponse } from "@/app/_types/chatMassage/MessagesResponse";
 import { MessageRequest } from "@/app/_types/chatMassage/MessageRequest";
 import { OpenAIService } from "../../../_services/OpenAIService";
+
 export async function GET(
   request: NextRequest,
   {
@@ -19,6 +20,7 @@ export async function GET(
   try {
     const { id } = await params;
     const user = await getCurrentUser({ request });
+    // const user = { id: "00000000-0000-0000-0000-000000000000" };これで通す
 
     const chatRoom = await prisma.chatRoom.findUnique({
       where: {
@@ -41,7 +43,7 @@ export async function GET(
       messages: chatRoom.messages,
     });
   } catch (error) {
-    buildError(error)
+    return buildError(error);
   }
 }
 
@@ -59,6 +61,7 @@ export async function POST(
   try {
     const { id } = await params;
     const user = await getCurrentUser({ request });
+    //const user = { id: "00000000-0000-0000-0000-000000000000" };これで通す
     const { content }: MessageRequest = await request.json();
 
     const chatRoom = await prisma.chatRoom.findUnique({
@@ -85,8 +88,8 @@ export async function POST(
     }));
 
     conversationHistory.push({
-      role: "user" as const,
-      content: content
+      role: "user",
+      content
     });
 
     const messages = [
@@ -118,9 +121,9 @@ export async function POST(
     });
 
     return NextResponse.json({
-      message: "Message sent successfully",
+      reply: aiResponse,
     });
   } catch (error) {
-    buildError(error);
+    return buildError(error);
   }
 }
